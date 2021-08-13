@@ -1,0 +1,192 @@
+---
+- name: Standard Linux
+  hosts: all
+  become: yes
+  tasks:
+          - name: Update System
+            apt:
+                    update_cache: yes
+                    upgrade: yes
+
+          - name: Install Vim
+            apt:
+                    name: vim
+                    state: latest
+         
+          - name: Install Sublime Text Key
+            apt_key:
+                    url: https://download.sublimetext.com/sublimehq-pub.gpg
+                    state: present
+
+          - name: Install apt-transport-https for Sublime Text
+            apt:
+                    name: apt-transport-https
+                    state: latest
+
+          - name: Add repo to sources list Sublime Text
+            apt_repository:
+                    repo: deb https://download.sublimetext.com/ apt/stable/ 
+                    state: present
+                    filename: sublime-text
+
+          - name: Update Cache
+            apt:
+                    update_cache: yes
+
+          - name: Install Sublime Text
+            apt:
+                    name: sublime-text
+                    state: latest
+
+          - name: Install dependencies for VS Code
+            apt:
+                    name: software-properties-common
+                    state: latest
+
+          - name: Install VS Code Key
+            apt_key:
+                    url: https://packages.microsoft.com/keys/microsoft.asc
+                    state: present
+
+          - name: Add repo to sources list VS Code
+            apt_repository:
+                    repo: deb https://packages.microsoft.com/repos/vscode stable main
+                    state: present
+                    filename: vs-code
+
+          - name: Install VS Code
+            apt:
+                    name: code
+                    state: latest
+                
+          - name: Install curl
+            apt:
+                    name: curl
+                    state: latest
+
+          - name: Install GIT
+            apt:
+                    name: git
+                    state: latest
+
+          - name: Install ZSH
+            apt:
+                    name: zsh
+                    state: latest
+
+          - name: change Shell to ZSH
+            command: usermod -s /bin/zsh seb
+
+          - name: Check if .zshrc exists
+            become: no
+            stat:
+                    path: ~/.zshrc
+            register: stat_rc_result
+
+          - name: Check if .oh-my-zsh exists
+            become: no
+            stat:
+                    path: ~/.oh-my-zsh
+            register: stat_oh_my_zsh_result
+
+          - name: Clone oh-my-zsh
+            become: no
+            git:
+                    repo: https://github.com/robbyrussell/oh-my-zsh
+                    dest: ~/.oh-my-zsh
+            #when: not stat_oh_my_zsh_result.stat.exists
+             
+          - name: Install Powerline from GIT
+            become: no
+            git:
+                    repo: https://github.com/romkatv/powerlevel10k.git
+                    dest: ~/.oh-my-zsh/custom/themes/powerlevel10k
+
+          - name: Install ZSH Autosuggestions from GIT
+            become: no
+            git:
+                    repo: https://github.com/zsh-users/zsh-autosuggestions.git
+                    dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+
+          - name: Install ZSH Syntax Highlighting
+            become: no
+            git:
+                    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+                    dest: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+
+          - name: Copy .zshrc
+            become: no
+            copy: 
+                    src: /home/administrator/.zshrc
+                    dest: ~/.zshrc
+                    mode: 0644
+
+          - name: Copy .p10k
+            become: no
+            copy:
+                    src: /home/administrator/.p10k.zsh
+                    dest: ~/.p10k.zsh
+                    mode: 0644        
+
+          - name: Install tmux
+            apt:
+                    name: tmux
+                    state: latest
+
+          - name: Install Brave Browser Key
+            apt_key:
+                    url: https://brave-browser-apt-release.s3.brave.com/brave-core.asc
+                    state: present
+
+          - name: Add repo to sources list Brave
+            apt_repository:
+                    repo: deb https://brave-browser-apt-release.s3.brave.com/ stable main
+                    state: present
+                    filename: brave-browser
+
+          - name: Install Brave Browser
+            apt:
+                    name: brave-browser
+                    state: latest
+
+          - name: Install Spotify
+            snap:
+                    name: spotify
+                    classic: yes
+
+          - name: Install Discord Snap
+            snap:
+                    name: discord
+                    classic: yes
+
+          - name: Install OpenJDK
+            apt:
+                    name: openjdk-16-jdk
+                    state: latest
+
+          - name: Install IntelliJ Idea
+            snap:
+                    name: intellij-idea-community
+                    classic: yes
+
+          - name: Install GCC
+            apt:
+                    name: gcc
+                    state: latest
+
+          - name: Copy background image
+            copy:
+                    src: /home/administrator/Pictures/landscape.jpg
+                    dest: /usr/share/backgrounds/landscape.jpg
+                    mode: 0644
+
+          - name: Set background image
+            become: no
+            command: gsettings set org.gnome.desktop.background picture-uri file:///usr/share/backgrounds/landscape.jpg
+
+          - name: Set dark theme as default
+            become: no
+            command: gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
+
+          - name: Reboot System
+            reboot:
