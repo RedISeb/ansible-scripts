@@ -188,5 +188,39 @@
             become: no
             command: gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
 
+          - name: Install ca-cert
+            apt:
+              name: ca-certificates
+              state: latest
+
+          - name: Install Docker Key
+            apt_key:
+                    url: https://download.docker.com/linux/ubuntu/gpg
+                    state: present
+
+          - name: Add repo to sources list Docker
+            apt_repository:
+                    repo: deb https://download.docker.com/linux/ubuntu focal main
+                    state: present
+                    filename: docker
+
+          - name: Update System
+            apt:
+                    update_cache: yes
+
+          - name: Docker Repo
+            command: apt-cache policy docker-ce
+
+          - name: Install Docker
+            apt:
+              name: docker-ce
+              state: latest
+
+          - name: Install Docker Compose
+            command: curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+          - name: Chmod Docker Compose
+            command: chmod +x /usr/local/bin/docker-compose
+
           - name: Reboot System
             reboot:
